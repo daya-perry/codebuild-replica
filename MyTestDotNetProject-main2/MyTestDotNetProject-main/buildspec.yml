@@ -1,0 +1,51 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 8.0
+      python: 3.12
+      nodejs: 22
+    commands:
+      - npm install -g cdk
+      - npm install -g ibm-openapi-validator@0.46.0
+      - export PATH="$PATH:/root/.dotnet/tools"
+      - dotnet tool install -g dotnet-reportgenerator-globaltool --version 5.2.0 --ignore-failed-sources
+  pre_build:
+    commands:
+      - echo $CODEBUILD_WEBHOOK_TRIGGER
+      - export CODEBUILD_GIT_BRANCH=`git branch -a --contains HEAD | sed -n 2p | awk '{ printf $1 }'`
+      - echo Printing variables...
+      - printenv
+  build:
+    commands:
+      - python rig.py build -e ci
+  post_build:
+    commands:
+      - dotnet test --filter Type=Unit -l:trx --collect:"XPlat Code Coverage" --settings runsettings.xml
+      - python rig.py deploy install --app Mis.Uk.Infrastructure -e ci
+      - dotnet test --filter Type=Integration -l:trx --collect:"XPlat Code Coverage" --settings runsettings.xml
+      - python rig.py install --app Mis.Uk.Infrastructure -e ci --readyToRun True
+      - dotnet test --filter Type=E2E-Integration -l:trx
+      - dotnet test --filter Type=Performance -l:trx
+      - reportgenerator "-reports:./**/TestResults/**/coverage.cobertura.xml" "-targetdir:./report" "-reporttypes:Cobertura"
+      - cd docs/gcis-events
+      - lint-openapi market-interaction-events-api.yaml
+      - cd ../external-api
+      - lint-openapi market-interaction-core-api.yaml
+      - lint-openapi market-interaction-uk-api.yaml
+reports:
+  Results:
+    files:
+      - "**/TestResults/*.trx"
+    discard-paths: yes
+    file-format: VisualStudioTrx
+  CodeCoverage:
+    files:
+      - "./report/Cobertura.xml"
+    discard-paths: yes
+    file-format: COBERTURAXML
+artifacts:
+  files:
+    - cdk-outputs/*
+  name: deployment-configuration
