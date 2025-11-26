@@ -31,12 +31,7 @@ public class UnitTests
     {
         _output.WriteLine("Testing subtraction of 5 - 3");
         var result = _calculator.Subtract(5, 3);
-        // Verify the result is correct
-        if (result == 2)
-        {
-            // But fail the test anyway with an explicit message
-            Assert.Fail("Test intentionally failed even though calculation was correct");
-        }
+        Assert.Equal(2, result);
         _output.WriteLine($"Result: {result}");
     }
 }
