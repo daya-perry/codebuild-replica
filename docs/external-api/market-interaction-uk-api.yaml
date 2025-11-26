@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info:
+  title: Market Interaction UK API
+  version: 1.0.0
+  description: UK specific market interaction API
+paths:
+  /uk:
+    get:
+      summary: Get UK data
+      responses:
+        '200':
+          description: Success
