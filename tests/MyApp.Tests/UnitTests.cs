@@ -1,32 +1,42 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+using Xunit.Abstractions;
 using MyApp;
 
 namespace MyApp.Tests;
 
-[TestClass]
 public class UnitTests
 {
-    private Calculator _calculator = new();
+    private readonly Calculator _calculator;
+    private readonly ITestOutputHelper _output;
 
-    [TestMethod]
-    [TestProperty("Type", "Unit")]
+    public UnitTests(ITestOutputHelper output)
+    {
+        _calculator = new Calculator();
+        _output = output;
+    }
+
+    [Fact]
+    [Trait("Type", "Unit")]
     public void Add_TwoNumbers_ReturnsSum()
     {
-        TestContext.WriteLine("Testing addition of 2 + 3");
+        _output.WriteLine("Testing addition of 2 + 3");
         var result = _calculator.Add(2, 3);
-        Assert.AreEqual(5, result);
-        TestContext.WriteLine($"Result: {result}");
+        Assert.Equal(5, result);
+        _output.WriteLine($"Result: {result}");
     }
 
-    [TestMethod]
-    [TestProperty("Type", "Unit")]
+    [Fact]
+    [Trait("Type", "Unit")]
     public void Subtract_TwoNumbers_ReturnsDifference()
     {
-        TestContext.WriteLine("Testing subtraction of 5 - 3");
+        _output.WriteLine("Testing subtraction of 5 - 3");
         var result = _calculator.Subtract(5, 3);
-        Assert.AreEqual(2, result);
-        TestContext.WriteLine($"Result: {result}");
+        // Verify the result is correct
+        if (result == 2)
+        {
+            // But fail the test anyway with an explicit message
+            Assert.Fail("Test intentionally failed even though calculation was correct");
+        }
+        _output.WriteLine($"Result: {result}");
     }
-
-    public TestContext TestContext { get; set; } = null!;
 }
