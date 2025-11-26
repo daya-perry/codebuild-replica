@@ -19,6 +19,7 @@ phases:
       - printenv
   build:
     commands:
+      - dotnet clean
       - python rig.py build -e ci
   post_build:
     commands:
